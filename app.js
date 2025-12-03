@@ -31,7 +31,8 @@ function formatDate(dateStr) {
     month: "2-digit", 
     day: "2-digit", 
     hour: "2-digit", 
-    minute: "2-digit" 
+    minute: "2-digit",
+    timeZone: "America/Lima"
   });
 }
 
@@ -39,7 +40,9 @@ function formatDateOnly(dateStr) {
   if (!dateStr) return "-";
   const d = new Date(dateStr);
   if (Number.isNaN(d.getTime())) return dateStr;
-  return d.toLocaleDateString("es-PE");
+  return d.toLocaleDateString("es-PE", {
+    timeZone: "America/Lima"
+  });
 }
 
 function formatPercent(value) {
