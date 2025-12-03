@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <title>Madurex – Panel de Fresas</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="stylesheet" href="style.css" />
+  <!-- Librería de iconos Lucide -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <!-- Librería QRCode.js -->
+  <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
+</head>
+<body>
+  <header class="topbar">
+    <div class="logo">
+      <span class="logo-mark">🍓</span>
+      <span class="logo-text">Madurex</span>
+      <span class="logo-subtitle">Sistema de Monitoreo de Fresas</span>
+    </div>
+    <nav class="nav-tabs">
+      <button data-view="dashboard" class="nav-btn active">Dashboard</button>
+      <button data-view="plants" class="nav-btn">Plantas</button>
+      <button data-view="detections" class="nav-btn">Detecciones</button>
+      <button data-view="map" class="nav-btn">Mapa del Cultivo</button>
+    </nav>
+    <button class="theme-toggle" id="theme-toggle" title="Cambiar a modo oscuro">
+      <span class="theme-icon">🌙</span>
+    </button>
+  </header>
+
+  <main class="content">
+
+    <!-- =============== DASHBOARD =============== -->
+    <section id="view-dashboard" class="view active">
+      <div class="dashboard-header">
+        <div>
+          <h1>Dashboard de Control</h1>
+          <p class="subtitle">Monitoreo en tiempo real del estado de tus cultivos</p>
+        </div>
+        <div class="dashboard-filters">
+          <select id="dash-filtro-campo">
+            <option value="">Todos los campos</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- KPIs principales -->
+      <div class="kpis-grid">
+        <div class="kpi-card">
+          <div class="kpi-icon">
+            <i data-lucide="sprout" class="icon-svg"></i>
+          </div>
+          <div class="kpi-content">
+            <span class="kpi-label">Total Plantas</span>
+            <span id="kpi-total-plantas" class="kpi-value">-</span>
+            <span class="kpi-description">Plantas registradas en el sistema</span>
+          </div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-icon">
+            <i data-lucide="camera" class="icon-svg"></i>
+          </div>
+          <div class="kpi-content">
+            <span class="kpi-label">Detecciones Hoy</span>
+            <span id="kpi-detecciones-hoy" class="kpi-value">-</span>
+            <span class="kpi-description">Detecciones realizadas hoy</span>
+          </div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-icon">
+            <i data-lucide="pie-chart" class="icon-svg"></i>
+          </div>
+          <div class="kpi-content">
+            <span class="kpi-label">Promedio Madurez</span>
+            <span id="kpi-prom-maduras" class="kpi-value">-</span>
+            <span class="kpi-description">Promedio de todas las detecciones</span>
+          </div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-icon">
+            <i data-lucide="check-circle" class="icon-svg"></i>
+          </div>
+          <div class="kpi-content">
+            <span class="kpi-label">Listas para Cosecha</span>
+            <span id="kpi-listas-cosecha" class="kpi-value">-</span>
+            <span class="kpi-description">Plantas con ≥60% de madurez</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Resumen por campo -->
+      <section class="panel">
+        <div class="panel-header">
+          <h2>📊 Resumen por Campo (Todas las Detecciones)</h2>
+        </div>
+        <div class="panel-content">
+          <div id="resumen-campos" class="resumen-campos-grid">
+            <!-- Rellenado por JS -->
+          </div>
+        </div>
+      </section>
+
+      <!-- Gráficos -->
+      <div class="charts-grid">
+        <section class="panel">
+          <div class="panel-header">
+            <h2>📈 Evolución de Detecciones (Últimos 7 días)</h2>
+          </div>
+          <div class="panel-content">
+            <div id="chart-detecciones" class="chart-container">
+              <!-- Gráfico por fecha -->
+            </div>
+          </div>
+        </section>
+
+        <section class="panel">
+          <div class="panel-header">
+            <h2>🥧 Distribución de Madurez (Total Acumulado)</h2>
+          </div>
+          <div class="panel-content">
+            <div id="chart-madurez" class="chart-container">
+              <!-- Gráfico circular -->
+            </div>
+          </div>
+        </section>
+      </div>
+
+      <!-- Últimas detecciones -->
+      <section class="panel">
+        <div class="panel-header">
+          <h2>🕐 Últimas Detecciones</h2>
+        </div>
+        <div class="table-wrapper">
+          <table>
+            <thead>
+              <tr>
+                <th>Fecha</th>
+                <th>Planta</th>
+                <th>Campo</th>
+                <th>Maduras</th>
+                <th>Intermedias</th>
+                <th>Inmaduras</th>
+                <th>% Maduras</th>
+                <th>Recomendación</th>
+                <th>Imagen</th>
+              </tr>
+            </thead>
+            <tbody id="dashboard-last-detections">
+              <!-- Rellenado por JS -->
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </section>
+
+    <!-- =============== PLANTAS =============== -->
+    <section id="view-plants" class="view">
+      <div class="view-header">
+        <div>
+          <h1>Gestión de Plantas</h1>
+          <p class="subtitle">Administra todas las plantas de tu cultivo</p>
+        </div>
+        <div class="header-actions">
+          <button class="btn primary" id="btn-nueva-planta">
+            <span>➕</span> Agregar Planta
+          </button>
+        </div>
+      </div>
+
+      <div class="filters-bar">
+        <label>
+          <span class="filter-label">Campo:</span>
+          <select id="filtro-campo-plantas">
+            <option value="">Todos</option>
+          </select>
+        </label>
+        <label>
+          <span class="filter-label">Búsqueda:</span>
+          <input type="text" id="buscar-planta" placeholder="Código QR, variedad..." />
+        </label>
+      </div>
+
+      <section class="panel">
+        <div class="panel-header">
+          <h2>🌱 Plantas Registradas</h2>
+          <span id="contador-plantas" class="badge">0 plantas</span>
+        </div>
+        <div class="table-wrapper">
+          <table>
+            <thead>
+              <tr>
+                <th>Código QR</th>
+                <th>Campo</th>
+                <th>Fila</th>
+                <th>Posición</th>
+                <th>Variedad</th>
+                <th>Descripción</th>
+                <th>Estado</th>
+                <th>Acciones</th>
+              </tr>
+            </thead>
+            <tbody id="tabla-plantas">
+              <!-- Rellenado por JS -->
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </section>
+
+    <!-- =============== DETECCIONES =============== -->
+    <section id="view-detections" class="view">
+      <div class="view-header">
+        <div>
+          <h1>Historial de Detecciones</h1>
+          <p class="subtitle">Registro completo de todas las detecciones realizadas</p>
+        </div>
+      </div>
+
+      <div class="filters-bar">
+        <label>
+          <span class="filter-label">Campo:</span>
+          <select id="filtro-campo-detecciones">
+            <option value="">Todos</option>
+          </select>
+        </label>
+        <label>
+          <span class="filter-label">Fecha desde:</span>
+          <input type="date" id="filtro-fecha-desde" />
+        </label>
+        <label>
+          <span class="filter-label">Fecha hasta:</span>
+          <input type="date" id="filtro-fecha-hasta" />
+        </label>
+        <label>
+          <span class="filter-label">Planta:</span>
+          <input type="text" id="filtro-planta-detecciones" placeholder="PLT-000001" />
+        </label>
+        <button class="btn" id="btn-limpiar-filtros">🔄 Limpiar</button>
+      </div>
+
+      <section class="panel">
+        <div class="panel-header">
+          <h2>📸 Detecciones Registradas</h2>
+          <span id="contador-detecciones" class="badge">0 detecciones</span>
+        </div>
+        <div class="table-wrapper">
+          <table>
+            <thead>
+              <tr>
+                <th>Fecha</th>
+                <th>Código QR</th>
+                <th>Campo</th>
+                <th>Fila</th>
+                <th>Posición</th>
+                <th>Maduras</th>
+                <th>Intermedias</th>
+                <th>Inmaduras</th>
+                <th>% Maduras</th>
+                <th>Recomendación</th>
+                <th>Imagen</th>
+              </tr>
+            </thead>
+            <tbody id="tabla-detecciones">
+              <!-- Rellenado por JS -->
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </section>
+
+    <!-- =============== MAPA DEL INVERNADERO =============== -->
+    <section id="view-map" class="view">
+      <div class="view-header">
+        <div>
+          <h1>Mapa del Cultivo</h1>
+          <p class="subtitle">Visualización espacial de tus campos de cultivo</p>
+        </div>
+      </div>
+
+      <div class="filters-bar">
+        <label>
+          <span class="filter-label">Campo:</span>
+          <select id="filtro-campo-mapa">
+            <option value="">Todos</option>
+          </select>
+        </label>
+        <div class="map-legend">
+          <span class="legend-item">
+            <span class="legend-dot ready"></span>Listo para cosecha (≥60%)
+          </span>
+          <span class="legend-item">
+            <span class="legend-dot partial"></span>Cosecha parcial (30-59%)
+          </span>
+          <span class="legend-item">
+            <span class="legend-dot unripe"></span>Inmadura (<30%)
+          </span>
+          <span class="legend-item">
+            <span class="legend-dot nodata"></span>Sin datos
+          </span>
+        </div>
+      </div>
+
+      <section class="panel">
+        <div class="panel-header">
+          <h2>🗺️ Distribución por Campo, Fila y Posición</h2>
+        </div>
+        <div id="mapa-campos" class="map-container">
+          <!-- Rellenado por JS -->
+        </div>
+      </section>
+    </section>
+
+  </main>
+
+  <!-- =============== MODAL AGREGAR/EDITAR PLANTA =============== -->
+  <div id="modal-planta" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2 id="modal-titulo">Agregar Nueva Planta</h2>
+        <button class="modal-close" id="modal-close">&times;</button>
+      </div>
+      <form id="form-planta" class="modal-body">
+        <input type="hidden" id="planta-id" />
+        <div class="form-row">
+          <div class="form-field">
+            <label for="campo-input">Campo *</label>
+            <input type="number" id="campo-input" min="1" required />
+          </div>
+          <div class="form-field">
+            <label for="fila-input">Fila *</label>
+            <input type="number" id="fila-input" min="1" required />
+          </div>
+          <div class="form-field">
+            <label for="posicion-input">Posición *</label>
+            <input type="number" id="posicion-input" min="1" required />
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-field">
+            <label for="variedad-input">Variedad</label>
+            <input type="text" id="variedad-input" placeholder="Ej: San Andrés, Albion" />
+          </div>
+        </div>
+        <div class="form-field">
+          <label for="descripcion-input">Descripción</label>
+          <textarea id="descripcion-input" rows="3" placeholder="Información adicional sobre la planta..."></textarea>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn" id="btn-cancelar">Cancelar</button>
+          <button type="submit" class="btn primary" id="btn-guardar-planta">Guardar Planta</button>
+        </div>
+        <div id="msg-form-planta" class="form-msg"></div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Canvas oculto para generar QR descargable -->
+  <canvas id="qr-canvas" style="display:none;"></canvas>
+
+  <!-- Librería QRCode debe cargarse antes del módulo -->
+  <script>
+    // Verificar que QRCode se cargó correctamente
+    window.addEventListener('load', function() {
+      if (typeof QRCode === 'undefined') {
+        console.error('⚠️ QRCode library failed to load');
+      } else {
+        console.log('✅ QRCode library loaded successfully');
+      }
+      
+      // Inicializar iconos de Lucide
+      if (typeof lucide !== 'undefined') {
+        lucide.createIcons();
+        console.log('✅ Lucide icons initialized');
+      } else {
+        console.error('⚠️ Lucide library failed to load');
+      }
+    });
+  </script>
+
+  <!-- App principal -->
+  <script type="module" src="app.js"></script>
+</body>
+</html>
